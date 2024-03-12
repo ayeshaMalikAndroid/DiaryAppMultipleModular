@@ -28,8 +28,10 @@ fun AuthenticationScreen(
     loadingState: Boolean,
     messageBarState: MessageBarState,
     onButtonClicked: () -> Unit,
+    onTokenIdReceived: (String) -> Unit,
+    onDialogDismissed: (String) -> Unit
 
-    ) {
+) {
     Scaffold(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surface)
@@ -48,12 +50,12 @@ fun AuthenticationScreen(
         state = oneTapState,
         clientId = CLIENT_ID,
         onTokenIdReceived = { tokenId ->
-            Log.d("Auth", "AuthenticationScreen: $tokenId")
-            messageBarState.addSuccess("Successfully Authenticated!")
+            onTokenIdReceived(tokenId)
+            //messageBarState.addSuccess("Successfully Authenticated!")
         },
         onDialogDismissed = { message ->
-            Log.d("Auth", "AuthenticationScreen: $message")
-            messageBarState.addError(Exception(message))
+            onDialogDismissed(message)
+
         })
 
 
