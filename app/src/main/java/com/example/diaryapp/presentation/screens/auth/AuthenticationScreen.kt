@@ -24,12 +24,14 @@ import com.stevdzasan.onetap.OneTapSignInWithGoogle
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AuthenticationScreen(
+    authenticated: Boolean,
     oneTapState: OneTapSignInState,
     loadingState: Boolean,
     messageBarState: MessageBarState,
     onButtonClicked: () -> Unit,
     onTokenIdReceived: (String) -> Unit,
-    onDialogDismissed: (String) -> Unit
+    onDialogDismissed: (String) -> Unit,
+    navigateToHome: () -> Unit
 
 ) {
     Scaffold(
@@ -51,6 +53,7 @@ fun AuthenticationScreen(
         clientId = CLIENT_ID,
         onTokenIdReceived = { tokenId ->
             onTokenIdReceived(tokenId)
+            Log.d("Authentication", "AuthenticationScreen: $tokenId")
             //messageBarState.addSuccess("Successfully Authenticated!")
         },
         onDialogDismissed = { message ->
@@ -58,5 +61,9 @@ fun AuthenticationScreen(
 
         })
 
-
+    LaunchedEffect(key1 = authenticated) {
+        if (authenticated) {
+            navigateToHome()
+        }
+    }
 }
