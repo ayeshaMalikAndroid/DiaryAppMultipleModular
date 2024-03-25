@@ -1,66 +1,146 @@
 package com.example.diaryapp.presentation.component
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+
+import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.toLowerCase
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import java.time.LocalDate
-import java.lang.String
+import com.example.diaryapp.model.Diary
+import com.example.diaryapp.model.Mood
+import com.example.diaryapp.ui.theme.Elevation
+import com.example.diaryapp.utils.toInstant
+import io.realm.kotlin.ext.realmListOf
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.*
 
+
+@SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
-fun DateHeader(localDate: LocalDate) {
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = String.format("%02d", localDate.dayOfMonth),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-            Text(
-                text = localDate.dayOfWeek.toString(),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-        }
-        Spacer(modifier = Modifier.width(14.dp))
-        Column(horizontalAlignment = Alignment.Start) {
-            Text(
-                text = localDate.month.toString(),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-            Text(
-                text = "${localDate.year}",
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-        }
+fun DiaryHolder(diary: Diary, onClick: (String) -> Unit) {
+    val localDensity = LocalDensity.current
+    var componentHeight by remember { mutableStateOf(0.dp) }
+    var galleryOpened by remember {
+        mutableStateOf(false)
     }
 
+    Row(
+        modifier = Modifier.clickable(
+            indication = null,
+            interactionSource = MutableInteractionSource()
+        ) { onClick(diary._id.toString()) }) {
+        Spacer(modifier = Modifier.width(14.dp))
+        Surface(
+            modifier = Modifier
+                .width(2.dp)
+                .height(14.dp), tonalElevation = Elevation.Level1
+        ) {}
+    }
+    Spacer(modifier = Modifier.width(20.dp))
+    Surface(
+        modifier = Modifier
+            .clip(shape = Shapes().medium)
+            .onGloballyPositioned {
+                componentHeight = with(localDensity) { it.size.height.toDp() }
+            },
+        tonalElevation = Elevation.Level1
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            DiaryHeader(moodName = diary.mood, time = diary.date.toInstant())
+            Text(
+                text = diary.description,
+                modifier = Modifier.padding(all = 14.dp),
+                style = TextStyle(fontSize = MaterialTheme.typography.bodyLarge.fontSize),
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (diary.images.isNotEmpty()) {
+                ShowGalleryButton(
+                    galleryOpened = galleryOpened,
+                    onClick = {
+                        galleryOpened = !galleryOpened
+                    }
+                )
+            }
+            AnimatedVisibility(visible = galleryOpened) {
+
+            }
+
+        }
+    }
 }
 
 @Composable
-@Preview(showBackground = true)
-fun DateHeaderPreview() {
-DateHeader(localDate = LocalDate.now())
+fun DiaryHeader(moodName: String, time: Instant) {
+    val mood by remember { mutableStateOf(Mood.valueOf(moodName)) }
+    val formatter = remember {
+        DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault())
+            .withZone(ZoneId.systemDefault())
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(mood.containerColor)
+            .padding(horizontal = 14.dp, vertical = 7.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                modifier = Modifier.size(18.dp),
+                painter = painterResource(id = mood.icon),
+                contentDescription = "Mood Icon",
+            )
+            Spacer(modifier = Modifier.width(7.dp))
+            Text(
+                text = mood.name,
+                color = mood.contentColor,
+                style = TextStyle(fontSize = MaterialTheme.typography.bodyMedium.fontSize)
+            )
+        }
+        Text(
+            text = formatter.format(time),
+            color = mood.contentColor,
+            style = TextStyle(fontSize = MaterialTheme.typography.bodyMedium.fontSize)
+        )
+    }
+}
+
+@Composable
+@Preview
+fun DiaryHolderPreview() {
+    DiaryHolder(diary = Diary().apply {
+        title = "My Diary"
+        description =
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        mood = Mood.Happy.name
+        images = realmListOf("","")
+    }, onClick = {})
+}
+
+@Composable
+fun ShowGalleryButton(galleryOpened: Boolean, onClick: () -> Unit) {
+
+    TextButton(onClick = { onClick }) {
+        Text(
+            text = if (galleryOpened) "Hide Gallery" else "Show Gallery",
+            style = TextStyle(fontSize = MaterialTheme.typography.bodySmall.fontSize)
+        )
+    }
 }

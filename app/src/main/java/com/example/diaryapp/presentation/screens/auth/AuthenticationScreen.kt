@@ -51,11 +51,13 @@ fun AuthenticationScreen(
     OneTapSignInWithGoogle(
         state = oneTapState,
         clientId = CLIENT_ID,
+        //this will return as the actual token ID that we receive from our Google Server when we authenticate with account.
         onTokenIdReceived = { tokenId ->
             onTokenIdReceived(tokenId)
             Log.d("Authentication", "AuthenticationScreen: $tokenId")
             //messageBarState.addSuccess("Successfully Authenticated!")
         },
+        //when we receive some error,then the error will be displayed here.
         onDialogDismissed = { message ->
             onDialogDismissed(message)
 
