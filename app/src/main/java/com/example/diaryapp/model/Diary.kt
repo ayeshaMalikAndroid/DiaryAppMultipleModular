@@ -8,7 +8,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
 import java.time.Instant
 
-class Diary : RealmObject {
+open class Diary : RealmObject {
     /*  _id is not the type of integer but,it'll be an object Id
   this objectID is a part of our
       Realm SDK and it will generate or it'll
@@ -32,3 +32,45 @@ class Diary : RealmObject {
 
 
 }
+
+
+// Schema data
+/*
+{"name" :"Diary",
+"bsonType" : "object",
+"required" : [
+   "_id",
+   "ownerId",
+   "title",
+   "description",
+   "mood",
+   "date"
+    ],
+    "properties" :{
+        "_id": {
+            "bsonType" :"objectId"
+        },
+        "ownerId": {
+            "bsonType" :"string"
+        },
+         "title": {
+            "bsonType" :"string"
+        },
+         "description": {
+            "bsonType" :"string"
+        },
+         "mood": {
+            "bsonType" :"string"
+        },
+        "newImages" : {
+            "bsonType" :"array",
+            "item" :{
+                "bsonType" :"string"
+            }
+        },
+         "date": {
+            "bsonType" :"date"
+        }
+    }
+}
+ */

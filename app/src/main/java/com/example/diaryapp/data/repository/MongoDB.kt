@@ -1,12 +1,20 @@
 package com.example.diaryapp.data.repository
 
+import android.security.keystore.UserNotAuthenticatedException
 import com.example.diaryapp.model.Diary
 import com.example.diaryapp.utils.Constants.APP_ID
+import com.example.diaryapp.utils.RequestState
+import com.example.diaryapp.utils.toInstant
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
+import io.realm.kotlin.query.Sort
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import java.time.ZoneId
 
 
 //how to synchronize the data between the client and the server and in our case Android application and MongoDB Atlas.
@@ -14,6 +22,11 @@ object MongoDB : MongoRepository {
     private val app = App.Companion.create(APP_ID)
     private val user = app.currentUser
     private lateinit var realm: Realm
+
+    init {
+        configureTheRealm()
+    }
+
     // after this realm configured will be used to interact with Mongodb to add,update or delete
     override fun configureTheRealm() {
         if (user != null) {
@@ -26,21 +39,47 @@ object MongoDB : MongoRepository {
             can be synchronized between devices using the Atlas device sync.
             */
             // need authenticated user that we need to pass to this builder.
+
             val config = SyncConfiguration.Builder(user, setOf(Diary::class))
                 .initialSubscriptions { sub ->
                     add(
-                        query = sub.query("ownerId == $0", user.identity),
+                        query = sub.query<Diary>(query = "ownerId == $0", user.id),
                         name = "User's Diaries"
                     )
-
                 }
                 .log(LogLevel.ALL)
                 .build()
             realm = Realm.open(config)
         }
     }
+//lecture 33 recall....
+    override fun getAllDiaries(): Flow<Diaries> {
+        return if (user != null) {
+            try {
+                //read data.
+                realm.query<Diary>(query = "ownerId == $0", user.id)
+                    .sort(property = "date", sortOrder = Sort.DESCENDING)
+                    .asFlow()
+                    .map { result ->
+                        RequestState.Success(
+                            data = result.list.groupBy {
+                                it.date.toInstant()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                            }
+                        )
+                    }
+            } catch (e: Exception) {
+                flow { emit(RequestState.Error(e)) }
+            }
+        } else {
+            flow { emit(RequestState.Error(com.example.diaryapp.data.repository.UserNotAuthenticatedException())) }
+        }
+    }
+
 }
 
+private class UserNotAuthenticatedException : Exception("User is not Logged in.")
 /*
 * single diary collection in the database where diaries from all users will be stored.
 *Only want to observe the diaries that were created by the current authenticated user.

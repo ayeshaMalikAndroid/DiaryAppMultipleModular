@@ -11,12 +11,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.diaryapp.data.repository.MongoDB
 import com.example.diaryapp.presentation.component.DisplayAlertDialog
 import com.example.diaryapp.presentation.screens.auth.AuthenticationScreen
 import com.example.diaryapp.presentation.screens.auth.AuthenticationViewModel
 import com.example.diaryapp.presentation.screens.home.HomeScreen
+import com.example.diaryapp.presentation.screens.home.HomeViewModel
 import com.example.diaryapp.utils.Constants.APP_ID
 import com.example.diaryapp.utils.Constants.WRITE_SCREEN_ARGUMENT_KEY
+import com.example.diaryapp.utils.RequestState
 import com.google.android.gms.common.util.CollectionUtils.listOf
 import com.stevdzasan.messagebar.rememberMessageBarState
 import com.stevdzasan.onetap.rememberOneTapSignInState
@@ -27,22 +30,29 @@ import kotlinx.coroutines.withContext
 
 @ExperimentalMaterial3Api
 @Composable
-fun SetupNavGraph(startDestination: String, navController: NavHostController) {
+fun SetupNavGraph(
+    startDestination: String,
+    navController: NavHostController,
+    onDataLoaded: () -> Unit
+) {
 
     NavHost(navController = navController, startDestination = startDestination) {
         authenticationRoute(
             navigateToHome = {
                 navController.popBackStack()
                 navController.navigate(Screen.Home.route)
-            }
+            },
+            onDataLoaded = onDataLoaded
         )
-        homeRoute(navigateToWrite = {
-            navController.navigate(Screen.Write.route)
-        },
-        navigateToAuth = {
-            navController.navigate(Screen.Authentication.route)
-        }
-            )
+        homeRoute(
+            navigateToWrite = {
+                navController.navigate(Screen.Write.route)
+            },
+            navigateToAuth = {
+                navController.navigate(Screen.Authentication.route)
+            },
+            onDataLoaded = onDataLoaded
+        )
         writeRoute()
     }
 
@@ -51,7 +61,8 @@ fun SetupNavGraph(startDestination: String, navController: NavHostController) {
 //Extension Function
 @ExperimentalMaterial3Api
 fun NavGraphBuilder.authenticationRoute(
-    navigateToHome: () -> Unit
+    navigateToHome: () -> Unit,
+    onDataLoaded: () -> Unit
 ) {
     composable(route = Screen.Authentication.route) {
         val viewModel: AuthenticationViewModel = viewModel()
@@ -59,7 +70,9 @@ fun NavGraphBuilder.authenticationRoute(
         val oneTapState = rememberOneTapSignInState()
         val messageBarState = rememberMessageBarState()
         val authenticated by viewModel.authenticated
-
+        LaunchedEffect(key1 = Unit) {
+            onDataLoaded
+        }
         AuthenticationScreen(
             authenticated = authenticated,
             loadingState = loadingState,
@@ -91,14 +104,30 @@ fun NavGraphBuilder.authenticationRoute(
     }
 }
 
-fun NavGraphBuilder.homeRoute(navigateToWrite: () -> Unit,navigateToAuth:()->Unit) {
+fun NavGraphBuilder.homeRoute(
+    navigateToWrite: () -> Unit,
+    navigateToAuth: () -> Unit,
+    onDataLoaded: () -> Unit
+) {
+
+
     composable(route = Screen.Home.route) {
+        val viewModel: HomeViewModel = viewModel()
+        //observe diaries from view model
+        val diaries by viewModel.diaries
+        val scope = rememberCoroutineScope()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         var signOutDialogOpened by remember {
             mutableStateOf(false)
         }
-        val scope = rememberCoroutineScope()
+        LaunchedEffect(key1 = diaries) {
+            if (diaries !is RequestState.Loading) {
+                onDataLoaded
+            }
+        }
+
         HomeScreen(
+            diaries = diaries,
             drawerState = drawerState,
             onSignOutClicked = { signOutDialogOpened = true },
             onMenuClicked = {
@@ -118,13 +147,17 @@ fun NavGraphBuilder.homeRoute(navigateToWrite: () -> Unit,navigateToAuth:()->Uni
                     val user = App.create(APP_ID).currentUser
                     if (user != null) {
                         user.logOut()
-                       withContext(Dispatchers.Main){
-                           navigateToAuth
-                       }
+                        withContext(Dispatchers.Main) {
+                            navigateToAuth
+                        }
                     }
                 }
             }
         )
+        LaunchedEffect(key1 = Unit) {
+            // able to receive automatically generated schema in our mongoDB Atlas.
+            MongoDB.configureTheRealm()
+        }
     }
 }
 //fun NavGraphBuilder.writeRoute() {
