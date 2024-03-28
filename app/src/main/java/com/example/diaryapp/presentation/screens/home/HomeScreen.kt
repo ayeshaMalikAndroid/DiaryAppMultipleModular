@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import com.example.diaryapp.R
 import com.example.diaryapp.data.repository.Diaries
 import com.example.diaryapp.utils.RequestState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
@@ -33,17 +35,21 @@ fun HomeScreen(
     var padding by remember {
         mutableStateOf(PaddingValues())
     }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     NavigationDrawer(
         drawerState = drawerState,
         onSignOutClicked = onSignOutClicked
     ) {
-        Scaffold(topBar = {
-            HomeTopBar(onMenuClicked = onMenuClicked)
-        },
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                HomeTopBar(scrollBehavior = scrollBehavior, onMenuClicked = onMenuClicked)
+            },
             floatingActionButton = {
                 FloatingActionButton(
                     modifier = Modifier.padding(end = padding.calculateEndPadding(LayoutDirection.Ltr)),
-                    onClick = { navigateToWrite }) {
+                    onClick = navigateToWrite
+                ) {
                     Icon(imageVector = Icons.Default.Edit, contentDescription = "New Diary Icon.")
                 }
             },
@@ -56,7 +62,7 @@ fun HomeScreen(
                             diaryNotes = diaries.data,
                             onClick = {}
                         )
-                        Log.d("HomeScreen", "HomeScreen: $diaries.data")
+                        Log.d("HomeScreen", "HomeScreen:Success ${diaries.data.size}")
                     }
 
                     is RequestState.Error -> {
@@ -64,7 +70,7 @@ fun HomeScreen(
                             title = "Error",
                             subtitle = "${diaries.error.message}"
                         )
-                        Log.d("HomeScreen", "HomeScreen: ${diaries.error.message}")
+                        Log.d("HomeScreen", "HomeScreen:Error ${diaries.error.message}")
                     }
 
                     is RequestState.Loading -> {
@@ -106,19 +112,21 @@ fun NavigationDrawer(
                         contentDescription = "Logo image"
                     )
                 }
-                NavigationDrawerItem(label = {
-                    Row(modifier = Modifier.padding(12.dp)) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.google_logo),
-                            contentDescription = "Google Logo",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = "Sign Out", color = MaterialTheme.colorScheme.onSurface)
-                    }
-                },
+                NavigationDrawerItem(
+                    label = {
+                        Row(modifier = Modifier.padding(12.dp)) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.google_logo),
+                                contentDescription = "Google Logo",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(text = "Sign Out", color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    },
                     selected = false,
-                    onClick = { onSignOutClicked })
+                    onClick = onSignOutClicked
+                )
             })
         },
         content = content

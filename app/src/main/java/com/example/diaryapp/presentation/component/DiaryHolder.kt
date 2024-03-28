@@ -3,6 +3,10 @@ package com.example.diaryapp.presentation.component
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,15 +34,14 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-
+//lecture 27 recall.....
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun DiaryHolder(diary: Diary, onClick: (String) -> Unit) {
     val localDensity = LocalDensity.current
     var componentHeight by remember { mutableStateOf(0.dp) }
-    var galleryOpened by remember {
-        mutableStateOf(false)
-    }
+    var galleryLoading by remember { mutableStateOf(false) }
+    var galleryOpened by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.clickable(
@@ -78,8 +81,17 @@ fun DiaryHolder(diary: Diary, onClick: (String) -> Unit) {
                     }
                 )
             }
+//            AnimatedVisibility(
+//                visible = galleryOpened && !galleryLoading,
+//                enter = fadeIn() + expandVertically(
+//                    animationSpec = spring(
+//                        dampingRatio = Spring.DampingRatioMediumBouncy,
+//                        stiffness = Spring.StiffnessLow
+//                    )
             AnimatedVisibility(visible = galleryOpened) {
-
+                Column(modifier = Modifier.padding(all = 14.dp)) {
+                    Gallery(images = diary.images)
+                }
             }
 
         }
@@ -122,17 +134,7 @@ fun DiaryHeader(moodName: String, time: Instant) {
     }
 }
 
-@Composable
-@Preview
-fun DiaryHolderPreview() {
-    DiaryHolder(diary = Diary().apply {
-        title = "My Diary"
-        description =
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-        mood = Mood.Happy.name
-        images = realmListOf("","")
-    }) {}
-}
+
 
 @Composable
 fun ShowGalleryButton(galleryOpened: Boolean, onClick: () -> Unit) {
@@ -143,4 +145,16 @@ fun ShowGalleryButton(galleryOpened: Boolean, onClick: () -> Unit) {
             style = TextStyle(fontSize = MaterialTheme.typography.bodySmall.fontSize)
         )
     }
+}
+
+@Composable
+@Preview
+fun DiaryHolderPreview() {
+    DiaryHolder(diary = Diary().apply {
+        title = "My Diary"
+        description =
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        mood = Mood.Happy.name
+        images = realmListOf("","")
+    }, onClick = {} )
 }

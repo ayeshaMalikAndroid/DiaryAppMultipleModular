@@ -1,6 +1,9 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.diaryapp.data.repository
 
 import android.security.keystore.UserNotAuthenticatedException
+import android.util.Log
 import com.example.diaryapp.model.Diary
 import com.example.diaryapp.utils.Constants.APP_ID
 import com.example.diaryapp.utils.RequestState
@@ -9,13 +12,14 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.log.LogLevel
 import io.realm.kotlin.mongodb.App
+import io.realm.kotlin.mongodb.subscriptions
 import io.realm.kotlin.mongodb.sync.SyncConfiguration
 import io.realm.kotlin.query.Sort
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.time.ZoneId
-
+import io.realm.kotlin.internal.platform.*
 
 //how to synchronize the data between the client and the server and in our case Android application and MongoDB Atlas.
 object MongoDB : MongoRepository {
@@ -28,17 +32,33 @@ object MongoDB : MongoRepository {
     }
 
     // after this realm configured will be used to interact with Mongodb to add,update or delete
+//    override fun configureTheRealm() {
+//        if (user != null) {
+//            /*           First parameter is the actual user or our current
+//            currently authenticated user from a MongoDB.
+//            Second parameter will be the actual class or multiple classes.
+//            going to sync with our mongodb realm or MongoDB Atlas.
+//  */
+//            /*Synchronization will basically be used to setup realm DB data
+//            can be synchronized between devices using the Atlas device sync.
+//            */
+//            // need authenticated user that we need to pass to this builder.
+//
+//            val config = SyncConfiguration.Builder(user, setOf(Diary::class))
+//                .initialSubscriptions { sub ->
+//                    add(
+//                        query = sub.query<Diary>(query = "ownerId == $0", user.id),
+//                        name = "User's Diaries"
+//                    )
+//                }
+//                .log(LogLevel.ALL)
+//                .build()
+//            realm = Realm.open(config)
+//        }
+//    }
     override fun configureTheRealm() {
+
         if (user != null) {
-            /*           First parameter is the actual user or our current
-            currently authenticated user from a MongoDB.
-            Second parameter will be the actual class or multiple classes.
-            going to sync with our mongodb realm or MongoDB Atlas.
-  */
-            /*Synchronization will basically be used to setup realm DB data
-            can be synchronized between devices using the Atlas device sync.
-            */
-            // need authenticated user that we need to pass to this builder.
 
             val config = SyncConfiguration.Builder(user, setOf(Diary::class))
                 .initialSubscriptions { sub ->
@@ -47,17 +67,42 @@ object MongoDB : MongoRepository {
                         name = "User's Diaries"
                     )
                 }
+
                 .log(LogLevel.ALL)
+
                 .build()
+
             realm = Realm.open(config)
+
+
+
+            // Refreshing subscriptions after configuring the Realm instance
+
+            realm.subscriptions.refresh()
+
         }
+
     }
-//lecture 33 recall....
+
+
+  //  lecture 33 recall....
     override fun getAllDiaries(): Flow<Diaries> {
         return if (user != null) {
             try {
-                //read data.
+//                val query = "ownerId == ${user.identity}"
+//                Log.d("Query", query)
+//                realm.query<Diary>(query = query)
+
+//                val ownerId = user.identity
+//                val query = "ownerId == '$ownerId'"
+//                realm.query<Diary>(query = query)
+
+
+          //      realm.query<Diary>(query = "ownerId == $0", user.identity)
+
+
                 realm.query<Diary>(query = "ownerId == $0", user.id)
+
                     .sort(property = "date", sortOrder = Sort.DESCENDING)
                     .asFlow()
                     .map { result ->
@@ -78,6 +123,7 @@ object MongoDB : MongoRepository {
     }
 
 }
+
 
 private class UserNotAuthenticatedException : Exception("User is not Logged in.")
 /*

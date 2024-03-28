@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlin.math.max
 
 @Composable
 fun Gallery(
@@ -31,8 +32,12 @@ fun Gallery(
         val numberOfVisibleImages = remember {
 
             derivedStateOf {
-                val computedValue = maxWidth.div(spaceBetween + imageSize).toInt().minus(1)
-                if (computedValue > 0) computedValue else 0
+                //   val computedValue = maxWidth.div(spaceBetween + imageSize).toInt().minus(1)
+                //  if (computedValue > 0) computedValue else 0
+                max(
+                    a = 0,
+                    b = this.maxWidth.div(spaceBetween + imageSize).toInt().minus(1)
+                )
             }
 
         }
@@ -43,6 +48,7 @@ fun Gallery(
         }
         Row {
             images.take(numberOfVisibleImages.value).forEach { image ->
+                //part of the coil image loading library.
                 AsyncImage(
                     modifier = Modifier
                         .clip(imageShape)

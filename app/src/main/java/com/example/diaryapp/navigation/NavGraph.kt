@@ -1,5 +1,6 @@
 package com.example.diaryapp.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +50,7 @@ fun SetupNavGraph(
                 navController.navigate(Screen.Write.route)
             },
             navigateToAuth = {
+                navController.popBackStack()
                 navController.navigate(Screen.Authentication.route)
             },
             onDataLoaded = onDataLoaded
@@ -156,7 +158,8 @@ fun NavGraphBuilder.homeRoute(
         )
         LaunchedEffect(key1 = Unit) {
             // able to receive automatically generated schema in our mongoDB Atlas.
-            MongoDB.configureTheRealm()
+           MongoDB.configureTheRealm()
+            Log.d("NavGraph", "homeRoute: ${MongoDB.configureTheRealm()}")
         }
     }
 }

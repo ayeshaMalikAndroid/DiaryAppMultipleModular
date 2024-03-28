@@ -17,7 +17,6 @@ fun DisplayAlertDialog(
 ) {
     if (dialogOpened) {
         AlertDialog(
-            modifier = Modifier.padding(horizontal = 24.dp),
             title = {
                 Text(
                     text = title,

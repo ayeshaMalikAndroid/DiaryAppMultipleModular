@@ -14,18 +14,23 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopBar(onMenuClicked: () -> Unit) {
-    TopAppBar(navigationIcon = {
-        IconButton(onClick = onMenuClicked) {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = "Hamburger Menu Icon",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }, title = {
-        Text(text = "Diary")
-    },
+fun HomeTopBar(
+    scrollBehavior: TopAppBarScrollBehavior,
+    onMenuClicked: () -> Unit
+) {
+    TopAppBar(
+        scrollBehavior = scrollBehavior,
+        navigationIcon = {
+            IconButton(onClick = onMenuClicked) {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Hamburger Menu Icon",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }, title = {
+            Text(text = "Diary")
+        },
         actions = {
             IconButton(onClick = onMenuClicked) {
                 //this icon will filter our diary according to dates.
