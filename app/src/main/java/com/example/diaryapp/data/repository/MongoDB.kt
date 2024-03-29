@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.time.ZoneId
 import io.realm.kotlin.internal.platform.*
+import org.mongodb.kbson.ObjectId
 
 //how to synchronize the data between the client and the server and in our case Android application and MongoDB Atlas.
 object MongoDB : MongoRepository {
@@ -75,7 +76,6 @@ object MongoDB : MongoRepository {
             realm = Realm.open(config)
 
 
-
             // Refreshing subscriptions after configuring the Realm instance
 
             realm.subscriptions.refresh()
@@ -85,7 +85,7 @@ object MongoDB : MongoRepository {
     }
 
 
-  //  lecture 33 recall....
+    //  lecture 33 recall....
     override fun getAllDiaries(): Flow<Diaries> {
         return if (user != null) {
             try {
@@ -98,7 +98,7 @@ object MongoDB : MongoRepository {
 //                realm.query<Diary>(query = query)
 
 
-          //      realm.query<Diary>(query = "ownerId == $0", user.identity)
+                //      realm.query<Diary>(query = "ownerId == $0", user.identity)
 
 
                 realm.query<Diary>(query = "ownerId == $0", user.id)
@@ -119,6 +119,19 @@ object MongoDB : MongoRepository {
             }
         } else {
             flow { emit(RequestState.Error(com.example.diaryapp.data.repository.UserNotAuthenticatedException())) }
+        }
+    }
+
+    override fun getSelectedDiary(diaryId: ObjectId): RequestState<Diary> {
+        return if (user != null) {
+            try {
+                val diary = realm.query<Diary>(query = "_id == $0", diaryId).find().first()
+                RequestState.Success(data = diary)
+            } catch (e: Exception) {
+                RequestState.Error(e)
+            }
+        } else {
+            RequestState.Error(com.example.diaryapp.data.repository.UserNotAuthenticatedException())
         }
     }
 

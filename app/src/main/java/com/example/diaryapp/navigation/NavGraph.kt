@@ -1,9 +1,11 @@
 package com.example.diaryapp.navigation
 
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,11 +15,15 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.diaryapp.data.repository.MongoDB
+import com.example.diaryapp.model.Diary
+import com.example.diaryapp.model.Mood
 import com.example.diaryapp.presentation.component.DisplayAlertDialog
 import com.example.diaryapp.presentation.screens.auth.AuthenticationScreen
 import com.example.diaryapp.presentation.screens.auth.AuthenticationViewModel
 import com.example.diaryapp.presentation.screens.home.HomeScreen
 import com.example.diaryapp.presentation.screens.home.HomeViewModel
+import com.example.diaryapp.presentation.screens.write.WriteScreen
+import com.example.diaryapp.presentation.screens.write.WriteViewModel
 import com.example.diaryapp.utils.Constants.APP_ID
 import com.example.diaryapp.utils.Constants.WRITE_SCREEN_ARGUMENT_KEY
 import com.example.diaryapp.utils.RequestState
@@ -53,9 +59,15 @@ fun SetupNavGraph(
                 navController.popBackStack()
                 navController.navigate(Screen.Authentication.route)
             },
-            onDataLoaded = onDataLoaded
+            onDataLoaded = onDataLoaded,
+            navigateToWriteArgs = {
+                navController.navigate(Screen.Write.passDiaryId(diaryId = it))
+            }
         )
-        writeRoute()
+        writeRoute(onBackPressed = {
+            navController.popBackStack()
+        }
+        )
     }
 
 }
@@ -108,6 +120,7 @@ fun NavGraphBuilder.authenticationRoute(
 
 fun NavGraphBuilder.homeRoute(
     navigateToWrite: () -> Unit,
+    navigateToWriteArgs: (String) -> Unit,
     navigateToAuth: () -> Unit,
     onDataLoaded: () -> Unit
 ) {
@@ -137,7 +150,8 @@ fun NavGraphBuilder.homeRoute(
                     drawerState.open()
                 }
             },
-            navigateToWrite = navigateToWrite
+            navigateToWrite = navigateToWrite,
+            navigateToWriteArgs = navigateToWriteArgs
         )
         DisplayAlertDialog(
             title = "Sign Out",
@@ -158,24 +172,15 @@ fun NavGraphBuilder.homeRoute(
         )
         LaunchedEffect(key1 = Unit) {
             // able to receive automatically generated schema in our mongoDB Atlas.
-           MongoDB.configureTheRealm()
+            MongoDB.configureTheRealm()
             Log.d("NavGraph", "homeRoute: ${MongoDB.configureTheRealm()}")
         }
     }
 }
-//fun NavGraphBuilder.writeRoute() {
-//    composable(route = Screen.Write.route, arguments =
-//    listOf(navArgument(name =WRITE_SCREEN_ARGUMENT_KEY){
-//        type = NavType.StringType
-//        nullable = true
-//        defaultValue = null
-//    })
-//    ) {
-//
-//    }
 
-@Suppress("DEPRECATION")
-fun NavGraphBuilder.writeRoute() {
+@OptIn(ExperimentalFoundationApi::class)
+fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
+
     composable(
         route = Screen.Write.route,
         arguments = listOf(navArgument(name = WRITE_SCREEN_ARGUMENT_KEY) {
@@ -184,7 +189,21 @@ fun NavGraphBuilder.writeRoute() {
             defaultValue = null
         })
     ) {
-
+        val viewModel: WriteViewModel = viewModel()
+        val uiState = viewModel.uiState
+        val pagerState = rememberPagerState(pageCount = { Mood.values().size })
+        LaunchedEffect(key1 = uiState) {
+            Log.d("Selected Diary", "writeRoute: ${uiState.selectedDiaryId}")
+        }
+        WriteScreen(
+            uiState = uiState,
+            pagerState = pagerState,
+            selectedDiary = null,
+            onDeleteConfirmed = {},
+            onTitleChanged = { viewModel.setTitle(title = it) },
+            onDescriptionChanged = { viewModel.setDescription(description = it) },
+            onBackPressed = onBackPressed
+        )
     }
 
 }
