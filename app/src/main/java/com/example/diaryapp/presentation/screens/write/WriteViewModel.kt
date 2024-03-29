@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.diaryapp.data.repository.MongoDB
+import com.example.diaryapp.model.Diary
 import com.example.diaryapp.model.Mood
 import com.example.diaryapp.utils.Constants
 import com.example.diaryapp.utils.Constants.WRITE_SCREEN_ARGUMENT_KEY
@@ -44,6 +45,7 @@ class WriteViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel
                     setTitle(title = diary.data.title)
                     setDescription(description = diary.data.description)
                     setMood(mood = Mood.valueOf(diary.data.mood))
+                    setSelectedDiary(diary = diary.data)
                 }
             }
         }
@@ -60,10 +62,15 @@ class WriteViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel
     fun setMood(mood: Mood) {
         uiState = uiState.copy(mood = mood)
     }
+
+    fun setSelectedDiary(diary: Diary) {
+        uiState = uiState.copy(selectedDiary = diary)
+    }
 }
 
 data class UiState(
     val selectedDiaryId: String? = null,
+    val selectedDiary: Diary? = null,
     val title: String = "",
     val description: String = "",
     val mood: Mood = Mood.Neutral

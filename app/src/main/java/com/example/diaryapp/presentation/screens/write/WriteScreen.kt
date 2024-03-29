@@ -15,7 +15,7 @@ import com.example.diaryapp.model.Mood
 fun WriteScreen(
     uiState: UiState,
     pagerState: PagerState,
-    selectedDiary: Diary?,
+    moodName: () -> String,
     onDeleteConfirmed: () -> Unit,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
@@ -29,7 +29,8 @@ fun WriteScreen(
     Scaffold(
         topBar = {
             WriteTopBar(
-                selectedDiary = selectedDiary,
+                selectedDiary = uiState.selectedDiary,
+                moodName = moodName,
                 onDeleteConfirmed = onDeleteConfirmed,
                 onBackPressed = onBackPressed
             )

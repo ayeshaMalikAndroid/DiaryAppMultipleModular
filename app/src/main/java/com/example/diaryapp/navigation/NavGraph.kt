@@ -192,13 +192,16 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
         val viewModel: WriteViewModel = viewModel()
         val uiState = viewModel.uiState
         val pagerState = rememberPagerState(pageCount = { Mood.values().size })
+        val pagerNumber by remember {
+            derivedStateOf { pagerState.currentPage }
+        }
         LaunchedEffect(key1 = uiState) {
             Log.d("Selected Diary", "writeRoute: ${uiState.selectedDiaryId}")
         }
         WriteScreen(
             uiState = uiState,
             pagerState = pagerState,
-            selectedDiary = null,
+            moodName = { Mood.values()[pagerNumber].name },
             onDeleteConfirmed = {},
             onTitleChanged = { viewModel.setTitle(title = it) },
             onDescriptionChanged = { viewModel.setDescription(description = it) },
