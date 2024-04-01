@@ -13,6 +13,7 @@ import com.example.diaryapp.utils.Constants
 import com.example.diaryapp.utils.Constants.WRITE_SCREEN_ARGUMENT_KEY
 import com.example.diaryapp.utils.RequestState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
@@ -39,15 +40,16 @@ class WriteViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel
     private fun fetchSelectedDiary() {
         if (uiState.selectedDiaryId != null) {
             viewModelScope.launch(Dispatchers.Main) {
-                val diary = MongoDB.getSelectedDiary(
-                    diaryId = ObjectId.invoke(uiState.selectedDiaryId!!)
-                )
-                if (diary is RequestState.Success) {
-                    setTitle(title = diary.data.title)
-                    setDescription(description = diary.data.description)
-                    setMood(mood = Mood.valueOf(diary.data.mood))
-                    setSelectedDiary(diary = diary.data)
-                }
+               MongoDB.getSelectedDiary(diaryId = ObjectId.invoke(uiState.selectedDiaryId!!)
+                ).collect(){ diary->
+                   if (diary is RequestState.Success) {
+                       setTitle(title = diary.data.title)
+                       setDescription(description = diary.data.description)
+                       setMood(mood = Mood.valueOf(diary.data.mood))
+                       setSelectedDiary(diary = diary.data)
+                   }
+               }
+
             }
         }
     }
@@ -73,7 +75,7 @@ class WriteViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel
         onError :(String) -> Unit
     ){
         viewModelScope.launch(Dispatchers.IO) {
-            val result =MongoDB.addNewDiary(diary = diary)
+            val result =MongoDB.insertDiary(diary = diary)
             if (result is RequestState.Success){
                 withContext(Dispatchers.Main){
                     onSuccess
