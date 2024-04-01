@@ -19,7 +19,8 @@ fun WriteScreen(
     onDeleteConfirmed: () -> Unit,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onSaveClicked: (Diary) -> Unit
 
 ) {
     //update the mood when selecting an exiting diary from home screen
@@ -39,10 +40,12 @@ fun WriteScreen(
             WriteContent(
                 pagerState = pagerState,
                 title = uiState.title,
+                uiState = uiState,
                 onTitleChanged = onTitleChanged,
                 description = uiState.description,
                 onDescriptionChanged = onDescriptionChanged,
-                paddingValues = it
+                paddingValues = it,
+                onSaveClicked = onSaveClicked
             )
         }
     )

@@ -1,5 +1,6 @@
 package com.example.diaryapp.model
 
+import com.example.diaryapp.utils.toRealmInstant
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmInstant
@@ -29,7 +30,7 @@ open class Diary : RealmObject {
     var mood: String = Mood.Neutral.name
     var description: String = ""
     var images: RealmList<String> = realmListOf()
-    var date: RealmInstant = RealmInstant.from(System.currentTimeMillis(), 0)
+    var date: RealmInstant = Instant.now().toRealmInstant()
 
 
 }
