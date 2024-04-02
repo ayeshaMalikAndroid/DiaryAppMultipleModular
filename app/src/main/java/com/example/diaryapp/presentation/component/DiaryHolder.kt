@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -35,65 +36,97 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 //lecture 27 recall.....
-@SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun DiaryHolder(diary: Diary, onClick: (String) -> Unit) {
     val localDensity = LocalDensity.current
+    val context = LocalContext.current
     var componentHeight by remember { mutableStateOf(0.dp) }
-    var galleryLoading by remember { mutableStateOf(false) }
     var galleryOpened by remember { mutableStateOf(false) }
+    var galleryLoading by remember { mutableStateOf(false) }
+  //  val downloadedImages = remember { mutableStateListOf<Uri>() }
 
-    Row(
-        modifier = Modifier.clickable(
+//    LaunchedEffect(key1 = galleryOpened) {
+//        if (galleryOpened && downloadedImages.isEmpty()) {
+//            galleryLoading = true
+//            fetchImagesFromFirebase(
+//                remoteImagePaths = diary.images,
+//                onImageDownload = { image ->
+//                    downloadedImages.add(image)
+//                },
+//                onImageDownloadFailed = {
+//                    Toast.makeText(
+//                        context,
+//                        "Images not uploaded yet." +
+//                                "Wait a little bit, or try uploading again.",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                    galleryLoading = false
+//                    galleryOpened = false
+//                },
+//                onReadyToDisplay = {
+//                    galleryLoading = false
+//                    galleryOpened = true
+//                }
+//            )
+//        }
+//    }
+
+    Row(modifier = Modifier
+        .clickable(
             indication = null,
-            interactionSource = MutableInteractionSource()
-        ) { onClick(diary._id.toString()) }) {
+            interactionSource = remember {
+                MutableInteractionSource()
+            }
+        ) { onClick(diary._id.toHexString()) }
+    ) {
         Spacer(modifier = Modifier.width(14.dp))
         Surface(
             modifier = Modifier
                 .width(2.dp)
-                .height(14.dp), tonalElevation = Elevation.Level1
+                .height(componentHeight + 14.dp),
+            tonalElevation = Elevation.Level1
         ) {}
-    }
-    Spacer(modifier = Modifier.width(20.dp))
-    Surface(
-        modifier = Modifier
-            .clip(shape = Shapes().medium)
-            .onGloballyPositioned {
-                componentHeight = with(localDensity) { it.size.height.toDp() }
-            },
-        tonalElevation = Elevation.Level1
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            DiaryHeader(moodName = diary.mood, time = diary.date.toInstant())
-            Text(
-                text = diary.description,
-                modifier = Modifier.padding(all = 14.dp),
-                style = TextStyle(fontSize = MaterialTheme.typography.bodyLarge.fontSize),
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis
-            )
-            if (diary.images.isNotEmpty()) {
-                ShowGalleryButton(
-                    galleryOpened = galleryOpened,
-                    onClick = {
-                        galleryOpened = !galleryOpened
-                    }
+        Spacer(modifier = Modifier.width(20.dp))
+        Surface(
+            modifier = Modifier
+                .clip(shape = Shapes().medium)
+                .onGloballyPositioned {
+                    componentHeight = with(localDensity) { it.size.height.toDp() }
+                },
+            tonalElevation = Elevation.Level1
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                DiaryHeader(moodName = diary.mood, time = diary.date.toInstant())
+                Text(
+                    modifier = Modifier.padding(all = 14.dp),
+                    text = diary.description,
+                    style = TextStyle(fontSize = MaterialTheme.typography.bodyLarge.fontSize),
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
-//            AnimatedVisibility(
-//                visible = galleryOpened && !galleryLoading,
-//                enter = fadeIn() + expandVertically(
-//                    animationSpec = spring(
-//                        dampingRatio = Spring.DampingRatioMediumBouncy,
-//                        stiffness = Spring.StiffnessLow
-//                    )
-            AnimatedVisibility(visible = galleryOpened) {
-                Column(modifier = Modifier.padding(all = 14.dp)) {
-                    Gallery(images = diary.images)
+                if (diary.images.isNotEmpty()) {
+                    ShowGalleryButton(
+                        galleryOpened = galleryOpened,
+                        galleryLoading = galleryLoading,
+                        onClick = {
+                            galleryOpened = !galleryOpened
+                        }
+                    )
+                }
+                AnimatedVisibility(
+                    visible = galleryOpened && !galleryLoading,
+                    enter = fadeIn() + expandVertically(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(all = 14.dp)) {
+                      //  Gallery(images = downloadedImages)
+                    }
                 }
             }
-
         }
     }
 }
@@ -134,14 +167,17 @@ fun DiaryHeader(moodName: String, time: Instant) {
     }
 }
 
-
-
 @Composable
-fun ShowGalleryButton(galleryOpened: Boolean, onClick: () -> Unit) {
-
-    TextButton(onClick = { onClick }) {
+fun ShowGalleryButton(
+    galleryOpened: Boolean,
+    galleryLoading: Boolean,
+    onClick: () -> Unit
+) {
+    TextButton(onClick = onClick) {
         Text(
-            text = if (galleryOpened) "Hide Gallery" else "Show Gallery",
+            text = if (galleryOpened)
+                if (galleryLoading) "Loading" else "Hide Gallery"
+            else "Show Gallery",
             style = TextStyle(fontSize = MaterialTheme.typography.bodySmall.fontSize)
         )
     }
@@ -155,6 +191,6 @@ fun DiaryHolderPreview() {
         description =
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
         mood = Mood.Happy.name
-        images = realmListOf("","")
-    }, onClick = {} )
+        images = realmListOf("", "")
+    }, onClick = {})
 }

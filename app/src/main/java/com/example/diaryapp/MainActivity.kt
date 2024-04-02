@@ -20,9 +20,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
-//            .setKeepOnScreenCondition {
-//            keepSplashOpened
-//        }
+            .setKeepOnScreenCondition {
+            keepSplashOpened
+        }
         WindowCompat.setDecorFitsSystemWindows(window,false)
         setContent {
             DiaryAppTheme {
@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = getStartDestination(),
                     navController = navController,
                     onDataLoaded = {
-                      //  keepSplashOpened = false
+                        keepSplashOpened = false
                     }
                 )
             }

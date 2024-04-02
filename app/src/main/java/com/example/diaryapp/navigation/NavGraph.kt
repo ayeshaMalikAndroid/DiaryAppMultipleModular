@@ -1,6 +1,7 @@
 package com.example.diaryapp.navigation
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
@@ -43,7 +45,10 @@ fun SetupNavGraph(
     onDataLoaded: () -> Unit
 ) {
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
         authenticationRoute(
             navigateToHome = {
                 navController.popBackStack()
@@ -66,6 +71,7 @@ fun SetupNavGraph(
         )
         writeRoute(onBackPressed = {
             navController.popBackStack()
+            Log.d("writeRoute", "SetupNavGraph: writeRoute is clicked...")
         }
         )
     }
@@ -85,7 +91,7 @@ fun NavGraphBuilder.authenticationRoute(
         val messageBarState = rememberMessageBarState()
         val authenticated by viewModel.authenticated
         LaunchedEffect(key1 = Unit) {
-            onDataLoaded
+            onDataLoaded()
         }
         AuthenticationScreen(
             authenticated = authenticated,
@@ -137,7 +143,7 @@ fun NavGraphBuilder.homeRoute(
         }
         LaunchedEffect(key1 = diaries) {
             if (diaries !is RequestState.Loading) {
-                onDataLoaded
+                onDataLoaded()
             }
         }
 
@@ -191,6 +197,7 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
     ) {
         val viewModel: WriteViewModel = viewModel()
         val uiState = viewModel.uiState
+        val context = LocalContext.current
         val pagerState = rememberPagerState(pageCount = { Mood.values().size })
         val pagerNumber by remember {
             derivedStateOf { pagerState.currentPage }
@@ -202,14 +209,25 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             uiState = uiState,
             pagerState = pagerState,
             moodName = { Mood.values()[pagerNumber].name },
-            onDeleteConfirmed = {},
+            onDeleteConfirmed = {
+                viewModel.deleteDiary(onSuccess = {
+                    Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
+                    onBackPressed()
+                }, onError = {message->
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
+                })
+            },
             onTitleChanged = { viewModel.setTitle(title = it) },
             onDescriptionChanged = { viewModel.setDescription(description = it) },
+            onDateTimeUpdated = { viewModel.updateDateTime(zonedDateTime = it) },
             onBackPressed = onBackPressed,
             onSaveClicked = {
-                viewModel.insertDiary(diary = it.apply { mood = Mood.values()[pagerNumber].name },
+                viewModel.upsertDiary(diary = it.apply { mood = Mood.values()[pagerNumber].name },
                     onSuccess = { onBackPressed() },
-                    onError = {}
+                    onError = {message->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    }
                 )
             }
         )

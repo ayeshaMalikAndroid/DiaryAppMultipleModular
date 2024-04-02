@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.example.diaryapp.model.Diary
 import com.example.diaryapp.model.Mood
+import java.time.ZonedDateTime
 
 @OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -20,6 +21,7 @@ fun WriteScreen(
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
     onBackPressed: () -> Unit,
+    onDateTimeUpdated: (ZonedDateTime) -> Unit,
     onSaveClicked: (Diary) -> Unit
 
 ) {
@@ -33,7 +35,9 @@ fun WriteScreen(
                 selectedDiary = uiState.selectedDiary,
                 moodName = moodName,
                 onDeleteConfirmed = onDeleteConfirmed,
-                onBackPressed = onBackPressed
+                onBackPressed = onBackPressed,
+                onDateTimeUpdated = onDateTimeUpdated
+
             )
         },
         content = {
