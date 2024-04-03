@@ -18,7 +18,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.diaryapp.data.repository.MongoDB
 import com.example.diaryapp.model.Diary
+import com.example.diaryapp.model.GalleryImage
 import com.example.diaryapp.model.Mood
+import com.example.diaryapp.model.rememberGalleryState
 import com.example.diaryapp.presentation.component.DisplayAlertDialog
 import com.example.diaryapp.presentation.screens.auth.AuthenticationScreen
 import com.example.diaryapp.presentation.screens.auth.AuthenticationViewModel
@@ -197,6 +199,7 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
     ) {
         val viewModel: WriteViewModel = viewModel()
         val uiState = viewModel.uiState
+        val galleryState = rememberGalleryState()
         val context = LocalContext.current
         val pagerState = rememberPagerState(pageCount = { Mood.values().size })
         val pagerNumber by remember {
@@ -208,12 +211,13 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
         WriteScreen(
             uiState = uiState,
             pagerState = pagerState,
+            galleryState = galleryState,
             moodName = { Mood.values()[pagerNumber].name },
             onDeleteConfirmed = {
                 viewModel.deleteDiary(onSuccess = {
                     Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
                     onBackPressed()
-                }, onError = {message->
+                }, onError = { message ->
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
                 })
@@ -225,9 +229,14 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             onSaveClicked = {
                 viewModel.upsertDiary(diary = it.apply { mood = Mood.values()[pagerNumber].name },
                     onSuccess = { onBackPressed() },
-                    onError = {message->
+                    onError = { message ->
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
+                )
+            },
+            onImageSelect = {
+                galleryState.addImage(
+                    GalleryImage(image = it, remoteImagePath = "")
                 )
             }
         )

@@ -2,6 +2,7 @@ package com.example.diaryapp.presentation.component
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -123,7 +124,8 @@ fun DiaryHolder(diary: Diary, onClick: (String) -> Unit) {
                     )
                 ) {
                     Column(modifier = Modifier.padding(all = 14.dp)) {
-                      //  Gallery(images = downloadedImages)
+                      Gallery(images = diary.images)
+                        Log.d("DiaryHolder", "DiaryHolder: ${diary.images.size}")
                     }
                 }
             }
