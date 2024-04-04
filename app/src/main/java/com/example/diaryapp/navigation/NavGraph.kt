@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
@@ -201,7 +202,7 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
             defaultValue = null
         })
     ) {
-        val viewModel: WriteViewModel = viewModel()
+        val viewModel: WriteViewModel = hiltViewModel()
         val uiState = viewModel.uiState
         val context = LocalContext.current
         val galleryState = viewModel.galleryState

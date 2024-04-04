@@ -2,7 +2,10 @@ package com.example.diaryapp.utils
 
 import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
+import com.example.diaryapp.data.database.entity.ImageToUpload
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storageMetadata
 import io.realm.kotlin.types.RealmInstant
 import java.time.Instant
 
@@ -56,4 +59,15 @@ fun fetchImagesFromFirebase(
             }
         }
     }
+}
+fun retryUploadingImageToFirebase(
+    imageToUpload: ImageToUpload,
+    onSuccess: () -> Unit
+) {
+    val storage = FirebaseStorage.getInstance().reference
+    storage.child(imageToUpload.remoteImagePath).putFile(
+        imageToUpload.imageUri.toUri(),
+        storageMetadata { },
+        imageToUpload.sessionUri.toUri()
+    ).addOnSuccessListener { onSuccess() }
 }
