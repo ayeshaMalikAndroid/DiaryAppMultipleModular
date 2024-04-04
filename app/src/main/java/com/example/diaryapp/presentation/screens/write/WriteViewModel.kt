@@ -42,10 +42,10 @@ import javax.inject.Inject
 //SaveStateHandle will basically allow us to access that the argument that we are passing to write screen.
 @HiltViewModel
 class WriteViewModel
-    @Inject constructor(
+@Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val imageToUploadDao: ImageToUploadDao
-) :ViewModel() {
+) : ViewModel() {
     var uiState by mutableStateOf(UiState())
         private set
     val galleryState = GalleryState()
@@ -196,6 +196,7 @@ class WriteViewModel
                 val result = MongoDB.deleteDiary(id = ObjectId.invoke(uiState.selectedDiaryId!!))
                 if (result is RequestState.Success) {
                     withContext(Dispatchers.Main) {
+                        uiState.selectedDiary?.let { deleteImagesFromFirebase(images = it.images) }
                         onSuccess()
                     }
                 } else if (result is RequestState.Error) {
@@ -242,6 +243,13 @@ System.currentTimeMillis() = if user upload same image avoid conflict
                         }
                     }
                 }
+        }
+    }
+
+    private fun deleteImagesFromFirebase(images: List<String>) {
+        val storage = FirebaseStorage.getInstance().reference
+        images.forEach { remotePath ->
+            storage.child(remotePath).delete()
         }
     }
 
