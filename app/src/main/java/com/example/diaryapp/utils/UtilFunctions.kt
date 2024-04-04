@@ -3,6 +3,7 @@ package com.example.diaryapp.utils
 import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
+import com.example.diaryapp.data.database.entity.ImageToDelete
 import com.example.diaryapp.data.database.entity.ImageToUpload
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
@@ -18,6 +19,7 @@ fun Instant.toRealmInstant(): RealmInstant {
         RealmInstant.from(sec + 1, -1_000_000 + nano)
     }
 }
+
 fun RealmInstant.toInstant(): Instant {
     val sec: Long = this.epochSeconds
     val nano: Int = this.nanosecondsOfSecond
@@ -27,6 +29,7 @@ fun RealmInstant.toInstant(): Instant {
         Instant.ofEpochSecond(sec - 1, 1_000_000 + nano.toLong())
     }
 }
+
 /**
  * Download images from Firebase asynchronously.
  * This function returns imageUri after each successful download.
@@ -60,6 +63,7 @@ fun fetchImagesFromFirebase(
         }
     }
 }
+
 fun retryUploadingImageToFirebase(
     imageToUpload: ImageToUpload,
     onSuccess: () -> Unit
@@ -70,4 +74,13 @@ fun retryUploadingImageToFirebase(
         storageMetadata { },
         imageToUpload.sessionUri.toUri()
     ).addOnSuccessListener { onSuccess() }
+}
+
+fun retryDeletingImageFromFirebase(
+    imageToDelete: ImageToDelete,
+    onSuccess: () -> Unit
+) {
+    val storage = FirebaseStorage.getInstance().reference
+    storage.child(imageToDelete.remoteImagePath).delete()
+        .addOnSuccessListener { onSuccess() }
 }

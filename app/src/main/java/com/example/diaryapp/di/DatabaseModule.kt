@@ -29,14 +29,13 @@ object DatabaseModule {
     @Provides
     fun provideFirstDao(database: ImagesDatabase) = database.imageToUploadDao()
 
-//    @Singleton
-//    @Provides
-//    fun provideSecondDao(database: ImagesDatabase) = database.imageToDeleteDao()
-//
+    @Singleton
+    @Provides
+    fun provideSecondDao(database: ImagesDatabase) = database.imageToDeleteDao()
+
 //    @Singleton
 //    @Provides
 //    fun provideNetworkConnectivityObserver(
 //        @ApplicationContext context: Context
 //    ) = NetworkConnectivityObserver(context = context)
-//}
 }
