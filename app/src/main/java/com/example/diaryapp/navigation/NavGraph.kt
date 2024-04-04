@@ -248,7 +248,8 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
 //                galleryState.addImage(
 //                    GalleryImage(image = it, remoteImagePath = "")
 //                )
-            }
+            },
+            onImageDeleteClicked = {}
         )
     }
 
