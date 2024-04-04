@@ -12,6 +12,8 @@ import com.example.diaryapp.navigation.Screen
 import com.example.diaryapp.navigation.SetupNavGraph
 import com.example.diaryapp.ui.theme.DiaryAppTheme
 import com.example.diaryapp.utils.Constants.APP_ID
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 import io.realm.kotlin.mongodb.App
 
 @ExperimentalMaterial3Api
@@ -21,9 +23,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
             .setKeepOnScreenCondition {
-            keepSplashOpened
-        }
-        WindowCompat.setDecorFitsSystemWindows(window,false)
+                keepSplashOpened
+            }
+        Firebase.initialize(this)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             DiaryAppTheme {
                 val navController = rememberNavController()

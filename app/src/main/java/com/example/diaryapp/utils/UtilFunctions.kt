@@ -1,5 +1,8 @@
 package com.example.diaryapp.utils
 
+import android.net.Uri
+import android.util.Log
+import com.google.firebase.storage.FirebaseStorage
 import io.realm.kotlin.types.RealmInstant
 import java.time.Instant
 
@@ -19,5 +22,38 @@ fun RealmInstant.toInstant(): Instant {
         Instant.ofEpochSecond(sec, nano.toLong())
     } else {
         Instant.ofEpochSecond(sec - 1, 1_000_000 + nano.toLong())
+    }
+}
+/**
+ * Download images from Firebase asynchronously.
+ * This function returns imageUri after each successful download.
+ * */
+
+/*
+ download URLs of image from Firebase Storage.
+ from remoteImagePath extracting download URL
+* */
+
+fun fetchImagesFromFirebase(
+    remoteImagePaths: List<String>,
+    onImageDownload: (Uri) -> Unit,
+    onImageDownloadFailed: (Exception) -> Unit = {},
+    onReadyToDisplay: () -> Unit = {}
+) {
+    if (remoteImagePaths.isNotEmpty()) {
+        remoteImagePaths.forEachIndexed { index, remoteImagePath ->
+            if (remoteImagePath.trim().isNotEmpty()) {
+                FirebaseStorage.getInstance().reference.child(remoteImagePath.trim()).downloadUrl
+                    .addOnSuccessListener {
+                        Log.d("DownloadURL", "$it")
+                        onImageDownload(it)
+                        if (remoteImagePaths.lastIndexOf(remoteImagePaths.last()) == index) {
+                            onReadyToDisplay()
+                        }
+                    }.addOnFailureListener {
+                        onImageDownloadFailed(it)
+                    }
+            }
+        }
     }
 }

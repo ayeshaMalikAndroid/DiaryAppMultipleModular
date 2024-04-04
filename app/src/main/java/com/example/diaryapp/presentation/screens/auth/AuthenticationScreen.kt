@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import com.example.diaryapp.utils.Constants.CLIENT_ID
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.ktx.Firebase
 import com.stevdzasan.messagebar.ContentWithMessageBar
 import com.stevdzasan.messagebar.MessageBarState
 import com.stevdzasan.onetap.OneTapSignInState
@@ -29,7 +30,8 @@ fun AuthenticationScreen(
     loadingState: Boolean,
     messageBarState: MessageBarState,
     onButtonClicked: () -> Unit,
-    onTokenIdReceived: (String) -> Unit,
+    onSuccessfulFirebaseSignIn: (String) -> Unit,
+    onFailedFirebaseSignIn: (Exception) -> Unit,
     onDialogDismissed: (String) -> Unit,
     navigateToHome: () -> Unit
 
@@ -53,8 +55,18 @@ fun AuthenticationScreen(
         clientId = CLIENT_ID,
         //this will return as the actual token ID that we receive from our Google Server when we authenticate with account.
         onTokenIdReceived = { tokenId ->
-            onTokenIdReceived(tokenId)
-            Log.d("Authentication", "AuthenticationScreen: $tokenId")
+            //tokenId going to receive from one tap signIn.
+            val credential = GoogleAuthProvider.getCredential(tokenId, null)
+            FirebaseAuth.getInstance().signInWithCredential(credential)
+                .addOnCompleteListener {task->
+                    if (task.isSuccessful) {
+                        onSuccessfulFirebaseSignIn(tokenId)
+                        Log.d("Authentication", "AuthenticationScreen: $tokenId")
+                    } else {
+                        task.exception?.let { it -> onFailedFirebaseSignIn(it) }
+                    }
+                }
+
             //messageBarState.addSuccess("Successfully Authenticated!")
         },
         //when we receive some error,then the error will be displayed here.

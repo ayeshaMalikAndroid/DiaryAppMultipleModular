@@ -103,7 +103,7 @@ fun NavGraphBuilder.authenticationRoute(
             onButtonClicked = {
                 oneTapState.open()
                 viewModel.setLoading(true)
-            }, onTokenIdReceived = { tokenId ->
+            }, onSuccessfulFirebaseSignIn = { tokenId ->
                 viewModel.signInWithMongoAtlas(
                     tokenId = tokenId,
                     onSuccess = {
@@ -119,6 +119,10 @@ fun NavGraphBuilder.authenticationRoute(
 
             }, onDialogDismissed = { message ->
                 messageBarState.addError(Exception(message))
+                viewModel.setLoading(false)
+            },
+            onFailedFirebaseSignIn = {
+                messageBarState.addError(it)
                 viewModel.setLoading(false)
             },
             navigateToHome = navigateToHome
@@ -199,8 +203,8 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
     ) {
         val viewModel: WriteViewModel = viewModel()
         val uiState = viewModel.uiState
-        val galleryState = rememberGalleryState()
         val context = LocalContext.current
+        val galleryState = viewModel.galleryState
         val pagerState = rememberPagerState(pageCount = { Mood.values().size })
         val pagerNumber by remember {
             derivedStateOf { pagerState.currentPage }
@@ -235,9 +239,14 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
                 )
             },
             onImageSelect = {
-                galleryState.addImage(
-                    GalleryImage(image = it, remoteImagePath = "")
-                )
+                // dynamically get the actual file extension of the Image Uri
+                val type = context.contentResolver.getType(it)?.split("/")?.last() ?: "jpg"
+                Log.d("WriteViewModel ", "writeRoute:NavGraph Uri: $it")
+                viewModel.addImages(image = it, imageType = type)
+
+//                galleryState.addImage(
+//                    GalleryImage(image = it, remoteImagePath = "")
+//                )
             }
         )
     }
