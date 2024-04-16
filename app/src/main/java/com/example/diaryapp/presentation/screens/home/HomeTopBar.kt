@@ -3,21 +3,42 @@ package com.example.diaryapp.presentation.screens.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.maxkeppeler.sheets.calendar.CalendarDialog
+import com.maxkeppeler.sheets.calendar.models.CalendarConfig
+import com.maxkeppeler.sheets.calendar.models.CalendarSelection
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
-    onMenuClicked: () -> Unit
+    onMenuClicked: () -> Unit,
+    dateIsSelected: Boolean,
+    onDateSelected: (ZonedDateTime) -> Unit,
+    onDateReset: () -> Unit
 ) {
+    var dateDialog = com.maxkeppeker.sheets.core.models.base.rememberSheetState()
+    var pickedDate by remember {
+        mutableStateOf(
+            LocalDate.now()
+        )
+    }
     TopAppBar(
         scrollBehavior = scrollBehavior,
         navigationIcon = {
@@ -32,15 +53,32 @@ fun HomeTopBar(
             Text(text = "Diary")
         },
         actions = {
-            IconButton(onClick = onMenuClicked) {
-                //this icon will filter our diary according to dates.
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = "Date Icon",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
+            if (dateIsSelected) {
+                IconButton(onClick = onDateReset) {
+                    //this icon will filter our diary according to dates.
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close Icon",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            } else {
+                IconButton(onClick = { dateDialog.show() }) {
+                    //this icon will filter our diary according to dates.
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Date Icon",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     )
+    CalendarDialog(state = dateDialog, selection = CalendarSelection.Date { localDate ->
+        pickedDate = localDate
+        onDateSelected(
+            ZonedDateTime.of(pickedDate, LocalTime.now(), ZoneId.systemDefault())
+        )
+    }, config = CalendarConfig(monthSelection = true, yearSelection = true))
 }
 

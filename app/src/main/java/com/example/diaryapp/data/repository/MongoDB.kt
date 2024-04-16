@@ -21,7 +21,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.time.ZoneId
 import io.realm.kotlin.internal.platform.*
+import io.realm.kotlin.types.RealmInstant
 import org.mongodb.kbson.ObjectId
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 
 //how to synchronize the data between the client and the server and in our case Android application and MongoDB Atlas.
 object MongoDB : MongoRepository {
@@ -73,6 +77,41 @@ object MongoDB : MongoRepository {
             }
         } else {
             flow { emit(RequestState.Error(com.example.diaryapp.data.repository.UserNotAuthenticatedException())) }
+        }
+    }
+
+    override fun getFilteredDiaries(zonedDateTime: ZonedDateTime): Flow<Diaries> {
+        return if (user != null) {
+            try {
+                realm.query<Diary>(
+                    "ownerId == $0 AND date < $1 AND date > $2",
+                    user.id,
+                    RealmInstant.from(
+                        LocalDateTime.of(
+                            zonedDateTime.toLocalDate().plusDays(1),
+                            LocalTime.MIDNIGHT
+                        ).toEpochSecond(zonedDateTime.offset), 0
+                    ),
+                    RealmInstant.from(
+                        LocalDateTime.of(
+                            zonedDateTime.toLocalDate(),
+                            LocalTime.MIDNIGHT
+                        ).toEpochSecond(zonedDateTime.offset), 0
+                    ),
+                ).asFlow().map { result ->
+                    RequestState.Success(
+                        data = result.list.groupBy {
+                            it.date.toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                        }
+                    )
+                }
+            } catch (e: Exception) {
+                flow { emit(RequestState.Error(e)) }
+            }
+        } else {
+            flow { emit(RequestState.Error(UserNotAuthenticatedException())) }
         }
     }
 
@@ -142,6 +181,22 @@ object MongoDB : MongoRepository {
                     }
                 } else {
                     RequestState.Error(Exception("Diary does not exist."))
+                }
+            }
+        } else {
+            RequestState.Error(UserNotAuthenticatedException())
+        }
+    }
+
+    override suspend fun deleteAllDiaries(): RequestState<Boolean> {
+        return if (user != null) {
+            realm.write {
+                val diaries = this.query<Diary>("ownerId == $0", user.id).find()
+                try {
+                    delete(diaries)
+                    RequestState.Success(data = true)
+                } catch (e: Exception) {
+                    RequestState.Error(e)
                 }
             }
         } else {

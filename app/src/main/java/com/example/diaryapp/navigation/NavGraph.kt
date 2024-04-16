@@ -140,12 +140,16 @@ fun NavGraphBuilder.homeRoute(
 
 
     composable(route = Screen.Home.route) {
-        val viewModel: HomeViewModel = viewModel()
+        val viewModel: HomeViewModel = hiltViewModel()
         //observe diaries from view model
         val diaries by viewModel.diaries
+        val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         var signOutDialogOpened by remember {
+            mutableStateOf(false)
+        }
+        var deleteAllDialogOpened by remember {
             mutableStateOf(false)
         }
         LaunchedEffect(key1 = diaries) {
@@ -164,7 +168,14 @@ fun NavGraphBuilder.homeRoute(
                 }
             },
             navigateToWrite = navigateToWrite,
-            navigateToWriteArgs = navigateToWriteArgs
+            navigateToWriteArgs = navigateToWriteArgs,
+            onDeleteAllClicked = {
+                deleteAllDialogOpened = true
+            },
+            dateIsSelected = viewModel.dateIsSelected,
+            onDateSelected = { viewModel.getDiaries(zonedDateTime = it) },
+            onDateReset = { viewModel.getDiaries() }
+
         )
         DisplayAlertDialog(
             title = "Sign Out",
@@ -181,6 +192,37 @@ fun NavGraphBuilder.homeRoute(
                         }
                     }
                 }
+            }
+        )
+        DisplayAlertDialog(
+            title = "Delete All Diaries",
+            message = "Are you sure you want to permanently delete all your diaries?",
+            dialogOpened = deleteAllDialogOpened,
+            onClosedDialog = { deleteAllDialogOpened = false },
+            onYesClicked = {
+                viewModel.deleteAllDiaries(
+                    onSuccess = {
+                        Toast.makeText(
+                            context,
+                            "All Diaries Deleted.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                    onError = {
+                        Toast.makeText(
+                            context,
+                            if (it.message == "No Internet Connectivity.") "We need an Internet Connection for this operation."
+                            else it.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    }
+                )
             }
         )
         LaunchedEffect(key1 = Unit) {
@@ -249,7 +291,8 @@ fun NavGraphBuilder.writeRoute(onBackPressed: () -> Unit) {
 //                    GalleryImage(image = it, remoteImagePath = "")
 //                )
             },
-            onImageDeleteClicked = { galleryState.removeImage(it)
+            onImageDeleteClicked = {
+                galleryState.removeImage(it)
                 Log.d("ImageDeleteClicked", "writeRoute:$it ")
             }
         )
