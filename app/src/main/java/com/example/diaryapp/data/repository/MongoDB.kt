@@ -3,11 +3,9 @@
 package com.example.diaryapp.data.repository
 
 import android.security.keystore.UserNotAuthenticatedException
-import android.util.Log
-import androidx.room.util.query
-import com.example.diaryapp.model.Diary
+import com.example.util.model.Diary
 import com.example.diaryapp.utils.Constants.APP_ID
-import com.example.diaryapp.utils.RequestState
+import com.example.util.model.RequestState
 import com.example.diaryapp.utils.toInstant
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query

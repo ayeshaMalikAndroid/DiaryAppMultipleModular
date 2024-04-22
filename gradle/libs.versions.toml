@@ -4,7 +4,7 @@ kotlin = "1.8.20"
 core-ktx = "1.12.0"
 lifecycle-runtime = "2.6.2"
 activity-compose = "1.7.2"
-material3-compose = "3:1.2.0-alpha08"
+material3-compose = "1.2.0-alpha08"
 junit = "4.13.2"
 junit-ext = "1.1.5"
 espresso = "3.5.1"
@@ -25,6 +25,10 @@ date-time-picker = "1.0.2"
 message-bar-compose = "1.0.5"
 one-tap-compose = "1.0.7"
 desugar = "2.0.3"
+agp = "8.1.1"
+org-jetbrains-kotlin-android = "1.8.20"
+appcompat = "1.6.1"
+material = "1.11.0"
 
 [libraries]
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx"}
@@ -62,3 +66,8 @@ time-dialog = { module = "com.maxkeppeler.sheets-compose-dialogs:clock", version
 message-bar-compose = { module = "com.github.stevdza-san:MessageBarCompose", version.ref = "message-bar-compose"}
 one-tap-compose = { module = "com.github.stevdza-san:OneTapCompose", version.ref = "one-tap-compose"}
 desugar-jdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar"}
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+[plugins]
+com-android-library = { id = "com.android.library", version.ref = "agp" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }

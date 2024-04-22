@@ -1,6 +1,5 @@
 package com.example.diaryapp.presentation.screens.write
 
-import android.icu.util.LocaleData
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -25,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import com.example.diaryapp.model.Diary
-import com.example.diaryapp.presentation.component.DisplayAlertDialog
+import com.example.util.model.Diary
+import com.example.ui.theme.component.DisplayAlertDialog
 import com.example.diaryapp.utils.toInstant
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
@@ -40,7 +39,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 

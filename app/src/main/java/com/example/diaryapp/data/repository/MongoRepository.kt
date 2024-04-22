@@ -1,7 +1,7 @@
 package com.example.diaryapp.data.repository
 
-import com.example.diaryapp.model.Diary
-import com.example.diaryapp.utils.RequestState
+import com.example.util.model.Diary
+import com.example.util.model.RequestState
 import kotlinx.coroutines.flow.Flow
 import org.mongodb.kbson.ObjectId
 import java.time.LocalDate

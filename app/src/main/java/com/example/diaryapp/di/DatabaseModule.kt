@@ -2,7 +2,7 @@ package com.example.diaryapp.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.diaryapp.connectivity.NetworkConnectivityObserver
+import com.example.util.connectivity.NetworkConnectivityObserver
 import com.example.diaryapp.data.database.ImagesDatabase
 import com.example.diaryapp.utils.Constants.IMAGES_DATABASE
 import dagger.Module

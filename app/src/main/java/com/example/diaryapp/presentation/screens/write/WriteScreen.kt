@@ -36,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.diaryapp.model.Diary
+import com.example.util.model.Diary
 import com.example.diaryapp.model.GalleryImage
 import com.example.diaryapp.model.GalleryState
-import com.example.diaryapp.model.Mood
+import com.example.util.model.Mood
 import java.time.ZonedDateTime
 
 @OptIn(ExperimentalFoundationApi::class)

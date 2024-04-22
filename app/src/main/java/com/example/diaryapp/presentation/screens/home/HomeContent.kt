@@ -1,7 +1,6 @@
 package com.example.diaryapp.presentation.screens.home
 
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,8 +24,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.diaryapp.model.Diary
-import com.example.diaryapp.presentation.component.DiaryHolder
+import com.example.util.model.Diary
+import com.example.ui.theme.component.DiaryHolder
 import java.time.LocalDate
 
 

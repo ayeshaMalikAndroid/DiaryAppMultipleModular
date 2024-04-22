@@ -36,18 +36,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.diaryapp.model.Diary
+import com.example.util.model.Diary
 import com.example.diaryapp.model.GalleryImage
 import com.example.diaryapp.model.GalleryState
-import com.example.diaryapp.model.Mood
-import com.example.diaryapp.presentation.component.GalleryUploader
+import com.example.util.model.Mood
+import com.example.ui.theme.component.GalleryUploader
 import io.realm.kotlin.ext.toRealmList
 import kotlinx.coroutines.launch
 

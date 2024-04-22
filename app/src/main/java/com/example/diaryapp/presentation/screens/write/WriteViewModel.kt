@@ -13,14 +13,12 @@ import com.example.diaryapp.data.database.ImageToUploadDao
 import com.example.diaryapp.data.database.entity.ImageToDelete
 import com.example.diaryapp.data.database.entity.ImageToUpload
 import com.example.diaryapp.data.repository.MongoDB
-import com.example.diaryapp.model.Diary
+import com.example.util.model.Diary
 import com.example.diaryapp.model.GalleryImage
 import com.example.diaryapp.model.GalleryState
-import com.example.diaryapp.model.Mood
-import com.example.diaryapp.model.rememberGalleryState
-import com.example.diaryapp.utils.Constants
+import com.example.util.model.Mood
 import com.example.diaryapp.utils.Constants.WRITE_SCREEN_ARGUMENT_KEY
-import com.example.diaryapp.utils.RequestState
+import com.example.util.model.RequestState
 import com.example.diaryapp.utils.fetchImagesFromFirebase
 import com.example.diaryapp.utils.toRealmInstant
 import com.google.firebase.auth.FirebaseAuth
@@ -31,7 +29,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.realm.kotlin.types.RealmInstant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId

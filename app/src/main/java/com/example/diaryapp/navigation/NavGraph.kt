@@ -3,14 +3,9 @@ package com.example.diaryapp.navigation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,11 +13,8 @@ import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.diaryapp.data.repository.MongoDB
-import com.example.diaryapp.model.Diary
-import com.example.diaryapp.model.GalleryImage
-import com.example.diaryapp.model.Mood
-import com.example.diaryapp.model.rememberGalleryState
-import com.example.diaryapp.presentation.component.DisplayAlertDialog
+import com.example.util.model.Mood
+import com.example.ui.theme.component.DisplayAlertDialog
 import com.example.diaryapp.presentation.screens.auth.AuthenticationScreen
 import com.example.diaryapp.presentation.screens.auth.AuthenticationViewModel
 import com.example.diaryapp.presentation.screens.home.HomeScreen
@@ -31,7 +23,7 @@ import com.example.diaryapp.presentation.screens.write.WriteScreen
 import com.example.diaryapp.presentation.screens.write.WriteViewModel
 import com.example.diaryapp.utils.Constants.APP_ID
 import com.example.diaryapp.utils.Constants.WRITE_SCREEN_ARGUMENT_KEY
-import com.example.diaryapp.utils.RequestState
+import com.example.util.model.RequestState
 import com.google.android.gms.common.util.CollectionUtils.listOf
 import com.stevdzasan.messagebar.rememberMessageBarState
 import com.stevdzasan.onetap.rememberOneTapSignInState
