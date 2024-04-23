@@ -1,5 +1,5 @@
 [versions]
-compose = "1.4.6"
+compose = "1.0.0"
 kotlin = "1.8.20"
 core-ktx = "1.12.0"
 lifecycle-runtime = "2.6.2"
@@ -19,8 +19,7 @@ kotlin-coroutines-core = "1.7.1"
 dagger-hilt = "2.48"
 hilt-navigation-compose = "1.0.0"
 coil = "2.3.0"
-# [DEPRECATED]
-#accompanist = "0.27.0"
+accompanist = "0.27.0"
 date-time-picker = "1.0.2"
 message-bar-compose = "1.0.5"
 one-tap-compose = "1.0.7"
@@ -58,8 +57,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagge
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger-hilt"}
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose"}
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil"}
-# [DEPRECATED]
-#accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist"}
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist"}
 date-time-picker = { module = "com.maxkeppeler.sheets-compose-dialogs:core", version.ref = "date-time-picker"}
 date-dialog = { module = "com.maxkeppeler.sheets-compose-dialogs:calendar", version.ref = "date-time-picker"}
 time-dialog = { module = "com.maxkeppeler.sheets-compose-dialogs:clock", version.ref = "date-time-picker"}
